@@ -60,6 +60,12 @@ func (t *MGClientTest) Test_TransportChannels() {
 	c := t.client()
 	chName := "WhatsApp Channel"
 	createdAt := "2021-11-22T08:20:46.479979Z"
+	markupFormats := []MarkupFormat{
+		MarkupFormatBold,
+		MarkupFormatItalic,
+		MarkupFormatUnderline,
+		MarkupFormatLink,
+	}
 
 	defer gock.Off()
 	t.gock().
@@ -84,6 +90,7 @@ func (t *MGClientTest) Test_TransportChannels() {
 							Deleting:      ChannelFeatureReceive,
 							MaxCharsCount: 4096,
 							Reaction:      ChannelFeatureAny,
+							MarkupFormats: &markupFormats,
 						},
 						Product: Product{
 							Creating: ChannelFeatureReceive,
@@ -141,10 +148,20 @@ func (t *MGClientTest) Test_TransportChannels() {
 	t.Assert().Equal(http.StatusOK, status)
 
 	t.Assert().Len(data, 1)
+	t.Assert().Equal(
+		[]MarkupFormat{MarkupFormatBold, MarkupFormatItalic, MarkupFormatUnderline, MarkupFormatLink},
+		*data[0].Settings.Text.MarkupFormats,
+	)
 }
 
 func (t *MGClientTest) Test_ActivateTransportChannel() {
 	c := t.client()
+	markupFormats := []MarkupFormat{
+		MarkupFormatBold,
+		MarkupFormatUnderline,
+		MarkupFormatInlineMonospace,
+		MarkupFormatBlockMonospace,
+	}
 	ch := Channel{
 		ID:   1,
 		Type: "telegram",
@@ -161,6 +178,7 @@ func (t *MGClientTest) Test_ActivateTransportChannel() {
 				Deleting:      ChannelFeatureBoth,
 				MaxCharsCount: 2000,
 				Reaction:      ChannelFeatureAny,
+				MarkupFormats: &markupFormats,
 			},
 			Product: Product{
 				Creating: ChannelFeatureSend,
@@ -191,6 +209,18 @@ func (t *MGClientTest) Test_ActivateTransportChannel() {
 	defer gock.Off()
 	t.gock().
 		Post(t.transportURL("channels")).
+		Filter(func(request *http.Request) bool {
+			data, err := ioutil.ReadAll(request.Body)
+			if err != nil {
+				return false
+			}
+			request.Body = ioutil.NopCloser(bytes.NewReader(data))
+
+			var requestChannel Channel
+			t.Require().NoError(json.Unmarshal(data, &requestChannel))
+
+			return t.Assert().Equal(*ch.Settings.Text.MarkupFormats, *requestChannel.Settings.Text.MarkupFormats)
+		}).
 		Reply(http.StatusCreated).
 		JSON(
 			ActivateResponse{
@@ -292,6 +322,7 @@ func (t *MGClientTest) Test_ActivateNewTransportChannel() {
 
 func (t *MGClientTest) Test_UpdateTransportChannel() {
 	c := t.client()
+	markupFormats := []MarkupFormat{}
 	ch := Channel{
 		ID:   1,
 		Name: "@my_shopping_bot_2",
@@ -301,11 +332,12 @@ func (t *MGClientTest) Test_UpdateTransportChannel() {
 				Read:      ChannelFeatureBoth,
 			},
 			Text: ChannelSettingsText{
-				Creating: ChannelFeatureBoth,
-				Editing:  ChannelFeatureBoth,
-				Quoting:  ChannelFeatureBoth,
-				Deleting: ChannelFeatureBoth,
-				Reaction: ChannelFeatureAny,
+				Creating:      ChannelFeatureBoth,
+				Editing:       ChannelFeatureBoth,
+				Quoting:       ChannelFeatureBoth,
+				Deleting:      ChannelFeatureBoth,
+				Reaction:      ChannelFeatureAny,
+				MarkupFormats: &markupFormats,
 			},
 			Product: Product{
 				Creating: ChannelFeatureSend,
@@ -337,6 +369,24 @@ func (t *MGClientTest) Test_UpdateTransportChannel() {
 	defer gock.Off()
 	t.gock().
 		Put(t.transportURL("channels/1")).
+		Filter(func(request *http.Request) bool {
+			data, err := ioutil.ReadAll(request.Body)
+			if err != nil {
+				return false
+			}
+			request.Body = ioutil.NopCloser(bytes.NewReader(data))
+
+			var requestData map[string]interface{}
+			t.Require().NoError(json.Unmarshal(data, &requestData))
+
+			settings, ok := requestData["settings"].(map[string]interface{})
+			t.Require().True(ok)
+			text, ok := settings["text"].(map[string]interface{})
+			t.Require().True(ok)
+			markupFormats, exists := text["markup_formats"]
+
+			return t.Assert().True(exists) && t.Assert().Empty(markupFormats)
+		}).
 		Reply(http.StatusOK).
 		JSON(
 			UpdateResponse{

@@ -63,6 +63,65 @@ func TestSendData_MarshalJSON(t *testing.T) {
 	})
 }
 
+func TestChannelSettingsTextMarkupFormats_JSON(t *testing.T) {
+	t.Run("WithFormats", func(t *testing.T) {
+		formats := []MarkupFormat{
+			MarkupFormatBold,
+			MarkupFormatItalic,
+			MarkupFormatUnderline,
+			MarkupFormatStrikethrough,
+			MarkupFormatInlineMonospace,
+			MarkupFormatBlockMonospace,
+			MarkupFormatLink,
+		}
+		settings := ChannelSettingsText{
+			Creating:      ChannelFeatureBoth,
+			MarkupFormats: &formats,
+		}
+
+		data, err := json.Marshal(settings)
+		assert.NoError(t, err)
+
+		assert.JSONEq(t, `{
+			"creating": "both",
+			"markup_formats": [
+				"bold",
+				"italic",
+				"underline",
+				"strikethrough",
+				"inline_monospace",
+				"block_monospace",
+				"link"
+			]
+		}`, string(data))
+
+		var decoded ChannelSettingsText
+		assert.NoError(t, json.Unmarshal(data, &decoded))
+		assert.Equal(t, settings, decoded)
+	})
+
+	t.Run("NilFormatsOmitted", func(t *testing.T) {
+		data, err := json.Marshal(ChannelSettingsText{Creating: ChannelFeatureBoth})
+		assert.NoError(t, err)
+
+		assert.JSONEq(t, `{"creating": "both"}`, string(data))
+	})
+
+	t.Run("EmptyFormatsEncoded", func(t *testing.T) {
+		formats := []MarkupFormat{}
+		data, err := json.Marshal(ChannelSettingsText{
+			Creating:      ChannelFeatureBoth,
+			MarkupFormats: &formats,
+		})
+		assert.NoError(t, err)
+
+		assert.JSONEq(t, `{
+			"creating": "both",
+			"markup_formats": []
+		}`, string(data))
+	})
+}
+
 func TestOriginator(t *testing.T) {
 	b, err := OriginatorCustomer.MarshalText()
 	assert.NoError(t, err)
