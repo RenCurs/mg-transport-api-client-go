@@ -26,6 +26,21 @@ const (
 	// ChannelFeatureCustomerExternalIDPhone customer externalId is phone.
 	ChannelFeatureCustomerExternalIDPhone string = "phone"
 
+	// MarkupFormatBold bold text markup.
+	MarkupFormatBold MarkupFormat = "bold"
+	// MarkupFormatItalic italic text markup.
+	MarkupFormatItalic MarkupFormat = "italic"
+	// MarkupFormatUnderline underline text markup.
+	MarkupFormatUnderline MarkupFormat = "underline"
+	// MarkupFormatStrikethrough strikethrough text markup.
+	MarkupFormatStrikethrough MarkupFormat = "strikethrough"
+	// MarkupFormatInlineMonospace inline monospace text markup.
+	MarkupFormatInlineMonospace MarkupFormat = "inline_monospace"
+	// MarkupFormatBlockMonospace block monospace text markup.
+	MarkupFormatBlockMonospace MarkupFormat = "block_monospace"
+	// MarkupFormatLink link text markup.
+	MarkupFormatLink MarkupFormat = "link"
+
 	// MsgTypeText text message.
 	MsgTypeText string = "text"
 	// MsgTypeSystem system message.
@@ -74,6 +89,8 @@ const (
 )
 
 type ErrorType string
+
+type MarkupFormat string
 
 const (
 	GeneralError           ErrorType = "general"
@@ -151,12 +168,13 @@ type Status struct {
 
 // ChannelSettingsText struct.
 type ChannelSettingsText struct {
-	Creating      string `json:"creating,omitempty"`
-	Editing       string `json:"editing,omitempty"`
-	Quoting       string `json:"quoting,omitempty"`
-	Deleting      string `json:"deleting,omitempty"`
-	Reaction      string `json:"reaction,omitempty"`
-	MaxCharsCount uint16 `json:"max_chars_count,omitempty"`
+	Creating      string          `json:"creating,omitempty"`
+	Editing       string          `json:"editing,omitempty"`
+	Quoting       string          `json:"quoting,omitempty"`
+	Deleting      string          `json:"deleting,omitempty"`
+	Reaction      string          `json:"reaction,omitempty"`
+	MaxCharsCount uint16          `json:"max_chars_count,omitempty"`
+	MarkupFormats *[]MarkupFormat `json:"markup_formats,omitempty"`
 }
 
 // ChannelSettingsFilesBase struct.
