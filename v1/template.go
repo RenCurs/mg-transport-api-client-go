@@ -91,6 +91,8 @@ func (b *TemplateButtons) UnmarshalJSON(value []byte) error {
 			btn = &PhoneButton{}
 		case ButtonTypeURL:
 			btn = &URLButton{}
+		case ButtonTypeRequestContactInfo:
+			btn = &RequestContactInfoButton{}
 		default:
 			return errors.New("undefined type of button")
 		}
@@ -117,7 +119,9 @@ func (b TemplateButtons) MarshalJSON() ([]byte, error) {
 		}
 
 		buffer := bytes.NewBuffer(btnData[:len(btnData)-1])
-		buffer.WriteByte(',')
+		if !bytes.Equal(btnData, []byte("{}")) {
+			buffer.WriteByte(',')
+		}
 		buffer.WriteString(fmt.Sprintf(`"type":"%s"`, btn.ButtonType()))
 		buffer.WriteByte('}')
 
@@ -139,10 +143,16 @@ type Button interface {
 type ButtonType string
 
 const (
-	ButtonTypePlain ButtonType = "plain"
-	ButtonTypePhone ButtonType = "phone"
-	ButtonTypeURL   ButtonType = "url"
+	ButtonTypePlain              ButtonType = "plain"
+	ButtonTypePhone              ButtonType = "phone"
+	ButtonTypeURL                ButtonType = "url"
+	ButtonTypeRequestContactInfo ButtonType = "request_contact_info"
 )
+
+// RequestContactInfoButton requests contact information without a customizable label.
+type RequestContactInfoButton struct{}
+
+func (RequestContactInfoButton) ButtonType() ButtonType { return ButtonTypeRequestContactInfo }
 
 type PlainButton struct {
 	Label string `json:"label"`
