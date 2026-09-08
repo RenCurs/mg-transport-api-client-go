@@ -206,10 +206,11 @@ type SendingPolicy struct {
 }
 
 type ChannelSettingsSuggestions struct {
-	Text  string `json:"text,omitempty"`
-	Phone string `json:"phone,omitempty"`
-	Email string `json:"email,omitempty"`
-	URL   string `json:"url,omitempty"`
+	RequestContactInfo string `json:"request_contact_info,omitempty"`
+	Text               string `json:"text,omitempty"`
+	Phone              string `json:"phone,omitempty"`
+	Email              string `json:"email,omitempty"`
+	URL                string `json:"url,omitempty"`
 }
 
 type ChannelSettingsTemplate struct {
@@ -556,10 +557,11 @@ type Attachments struct {
 }
 
 const (
-	SuggestionTypeText  SuggestionType = "text"
-	SuggestionTypeEmail SuggestionType = "email"
-	SuggestionTypePhone SuggestionType = "phone"
-	SuggestionTypeURL   SuggestionType = "url"
+	SuggestionTypeText               SuggestionType = "text"
+	SuggestionTypeEmail              SuggestionType = "email"
+	SuggestionTypePhone              SuggestionType = "phone"
+	SuggestionTypeURL                SuggestionType = "url"
+	SuggestionTypeRequestContactInfo SuggestionType = "request_contact_info"
 )
 
 type SuggestionType string
