@@ -119,7 +119,7 @@ func (b TemplateButtons) MarshalJSON() ([]byte, error) {
 		}
 
 		buffer := bytes.NewBuffer(btnData[:len(btnData)-1])
-		if len(btnData) > 2 {
+		if !bytes.Equal(btnData, []byte("{}")) {
 			buffer.WriteByte(',')
 		}
 		buffer.WriteString(fmt.Sprintf(`"type":"%s"`, btn.ButtonType()))
