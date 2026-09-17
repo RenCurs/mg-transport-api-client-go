@@ -401,13 +401,14 @@ type ReactionMessageReference struct {
 }
 
 type SendMessageRequestMessage struct {
-	Type       string     `json:"type"`
-	ExternalID string     `json:"external_id,omitempty"`
-	CreatedAt  *time.Time `json:"created_at,omitempty"`
-	IsComment  bool       `json:"is_comment,omitempty"`
-	Text       string     `json:"text"`
-	Items      []Item     `json:"items"`
-	Note       string     `json:"note,omitempty"`
+	Type       string              `json:"type"`
+	ExternalID string              `json:"external_id,omitempty"`
+	CreatedAt  *time.Time          `json:"created_at,omitempty"`
+	IsComment  bool                `json:"is_comment,omitempty"`
+	Text       string              `json:"text"`
+	Items      []Item              `json:"items"`
+	Note       string              `json:"note,omitempty"`
+	Product    *MessageDataProduct `json:"product,omitempty"`
 }
 
 // SendData struct.

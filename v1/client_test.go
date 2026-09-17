@@ -998,6 +998,66 @@ func (t *MGClientTest) Test_MessagesHistory() {
 	t.Assert().Equal(1, data.MessageID)
 }
 
+func (t *MGClientTest) Test_ProductMessagesHistory() {
+	c := t.client()
+
+	snd := SendHistoryMessageRequest{
+		Message: SendMessageRequestMessage{
+			ExternalID: "external_id",
+			Type:       MsgTypeProduct,
+			Product: &MessageDataProduct{
+				ID:      2,
+				Name:    "Product name",
+				Article: "Product article",
+				Url:     "https://example.local/product/1",
+				Img:     "https://example.local/product/1/img",
+				Cost: &MessageDataOrderCost{
+					Value:    100,
+					Currency: "USD",
+				},
+				Unit: "pcs",
+			},
+		},
+		Originator: OriginatorCustomer,
+		Customer: &Customer{
+			ExternalID: "6",
+			Nickname:   "octopus",
+			Firstname:  "Joe",
+		},
+		ChannelID:      1,
+		ExternalChatID: "24798237492374",
+	}
+
+	defer gock.Off()
+	t.gock().
+		Post(t.transportURL("messages/history")).
+		Filter(func(request *http.Request) bool {
+			data, err := ioutil.ReadAll(request.Body)
+			if err != nil {
+				return false
+			}
+			request.Body = ioutil.NopCloser(bytes.NewReader(data))
+
+			var actual SendHistoryMessageRequest
+			t.Require().NoError(json.Unmarshal(data, &actual))
+
+			return t.Assert().Equal(snd.Message.Product, actual.Message.Product)
+		}).
+		Reply(http.StatusOK).
+		JSON(
+			MessagesResponse{
+				MessageID: 1,
+				Time:      time.Now(),
+			},
+		)
+
+	data, status, err := c.MessagesHistory(snd)
+	t.Require().NoError(err)
+	t.Assert().Equal(http.StatusOK, status)
+	t.Assert().NotEmpty(data.Time.String())
+	t.Assert().Equal(1, data.MessageID)
+}
+
 func (t *MGClientTest) Test_AddMessageReaction() {
 	c := t.client()
 
